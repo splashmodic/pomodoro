@@ -26,7 +26,7 @@
 	}
 	let faviconLink = faviconList[faviconPicker.ready][mode];
 	let skews = initSkews();
-	let infiniteBeepToggle = { counter: 0, toggle: false };
+	let continuous = { counter: 0, toggle: false };
 	const continuousOrderList = [25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 15 * 60];
 	let continuosPos = 0;
 
@@ -39,14 +39,16 @@
 
 	onMount(() => (beepSound = new Audio(beepSoundFile)));
 
-	function pickCountdown(t: number) {
-		if (!infiniteBeepToggle.toggle) {
-			stopCountdown();
-			stopInfiniteBeep();
-		}
+	function setCountdown(t: number) {
 		resetSkews();
 		lastInitTime = t;
 		time = t;
+	}
+
+	function pickCountdown(t: number) {
+		stopCountdown();
+		stopInfiniteBeep();
+		setCountdown(t);
 	}
 
 	function runCountdown() {
@@ -60,13 +62,13 @@
 			--time;
 			if (!countdownIsRun || time === 0) {
 				setInfiniteBeep();
-				if (infiniteBeepToggle.toggle) {
-					if (continuosPos === continuousOrderList.length - 1) {
+				if (continuous.toggle) {
+					if (continuosPos >= continuousOrderList.length - 1) {
 						continuosPos = 0;
 					} else {
 						++continuosPos;
 					}
-					pickCountdown(continuousOrderList[continuosPos]);
+					setCountdown(continuousOrderList[continuosPos]);
 				} else {
 					stopCountdown();
 				}
@@ -100,16 +102,41 @@
 	function playInfiniteBeep() {
 		setTimeout(
 			() => {
-				if (
-					!infiniteBeepIsPlaying ||
-					(infiniteBeepToggle.toggle && ++infiniteBeepToggle.counter === 6)
-				) {
+				if (!infiniteBeepIsPlaying) {
 					return;
+				}
+				if (continuous.toggle) {
+					++continuous.counter;
+					switch (mode) {
+						case 1:
+							if (continuous.counter === 5) {
+								continuous.counter = 0;
+								return;
+							}
+							break;
+						case 2:
+							if (continuous.counter === 2) {
+								continuous.counter = 0;
+								return;
+							}
+							break;
+						case 3:
+							if (continuous.counter === 4) {
+								continuous.counter = 0;
+								return;
+							}
+							break;
+						default:
+							if (continuous.counter === 2) {
+								continuous.counter = 0;
+								return;
+							}
+					}
 				}
 				beepSound.currentTime = 0;
 				beepSound.play();
 			},
-			infiniteBeepToggle.toggle ? 700 : 1000
+			continuous.toggle ? 700 : 1000
 		);
 	}
 
@@ -123,9 +150,9 @@
 
 	$: {
 		if (time < 10 * 60) {
-			timeString.minutes = `0${parseInt(`${time / 60}`)}`;
+			timeString.minutes = `0${Math.floor(time / 60)}`;
 		} else {
-			timeString.minutes = `${parseInt(`${time / 60}`)}`;
+			timeString.minutes = `${Math.floor(time / 60)}`;
 		}
 
 		if (time % 60 < 10) {
@@ -179,8 +206,21 @@
 				break;
 			default:
 				title += 'Testing, maybe';
-				background = 'bg-white';
+				background = 'bg-black';
 		}
+	}
+
+	$: switch (continuosPos) {
+		case 1:
+		case 3:
+		case 5:
+			mode = 1;
+			break;
+		case 7:
+			mode = 2;
+			break;
+		default:
+			mode = 0;
 	}
 </script>
 
@@ -190,7 +230,7 @@
 </svelte:head>
 
 <div
-	class={`min-w-screen min-h-screen p-8 flex flex-col gap-10 items-center justify-center select-none transition-colors duration-300 ${background}`}
+	class="min-w-screen min-h-screen p-8 flex flex-col gap-10 items-center justify-center select-none transition-colors duration-300 {background}"
 >
 	<div class="relative z-10 flex flex-wrap justify-center gap-3 sm:gap-4">
 		<button
@@ -234,7 +274,15 @@
 			<p class="text-xs sm:text-sm">2 secs</p>
 		</button> -->
 	</div>
-	<div class="w-80 h-80 sm:w-96 sm:h-96 relative overflow-hidden">
+	<div
+		class="w-80 h-80 sm:w-96 sm:h-96 relative rounded-full cursor-pointer overflow-hidden"
+		on:click={countdownIsRun || infiniteBeepIsPlaying
+			? () => {
+					stopCountdown();
+					stopInfiniteBeep();
+			  }
+			: runCountdown}
+	>
 		<div
 			class="relative w-full h-full flex items-center justify-center rounded-full border-8 border-white text-white text-8xl"
 		>
@@ -248,19 +296,19 @@
 			class="w-full h-full sm:w-96 sm:h-96 absolute top-0 z-10 rounded-full border-8 border-white/30"
 		/>
 		<div
-			class="w-screen h-screen absolute bottom-1/2 right-1/2 bg-[#f4574a] origin-bottom-right"
+			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-colors duration-300 {background} origin-bottom-right"
 			style="transform: skewY({skews.a}deg)"
 		/>
 		<div
-			class="w-screen h-screen absolute bottom-1/2 right-1/2 bg-[#f4574a] origin-bottom-right"
+			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-colors duration-300 {background} origin-bottom-right"
 			style="transform: rotate(-90deg) skewY({skews.b}deg)"
 		/>
 		<div
-			class="w-screen h-screen absolute bottom-1/2 right-1/2 bg-[#f4574a] origin-bottom-right"
+			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-colors duration-300 {background} origin-bottom-right"
 			style="transform: rotate(-180deg) skewY({skews.c}deg)"
 		/>
 		<div
-			class="w-screen h-screen absolute bottom-1/2 right-1/2 bg-[#f4574a] origin-bottom-right"
+			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-colors duration-300 {background} origin-bottom-right"
 			style="transform: rotate(-270deg) skewY({skews.d}deg)"
 		/>
 	</div>
@@ -278,23 +326,22 @@
 			>RESET</button
 		>
 		<label
-			for="infiniteBeep"
-			class="py-1 sm:py-2 px-2 sm:px-4 bg-white rounded-lg whitespace-nowrap"
+			for="continuous"
+			class="py-1 sm:py-2 px-2 sm:px-4 flex gap-1 items-center bg-white rounded-lg whitespace-nowrap"
 		>
 			<input
-				id="infiniteBeep"
+				id="continuous"
 				type="checkbox"
-				bind:checked={infiniteBeepToggle.toggle}
+				bind:checked={continuous.toggle}
 				on:change={() => {
-					if (infiniteBeepToggle.toggle) {
-						stopCountdown();
+					if (continuous.toggle) {
 						continuosPos = 0;
 						pickCountdown(25 * 60);
 						mode = 0;
 					}
 				}}
 			/>
-			<span class="ml-1">Continuous</span>
+			<span>Continuous</span>
 		</label>
 	</div>
 </div>
