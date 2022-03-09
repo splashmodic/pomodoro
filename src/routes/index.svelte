@@ -296,19 +296,19 @@
 			class="w-full h-full sm:w-96 sm:h-96 absolute top-0 z-10 rounded-full border-8 border-white/30"
 		/>
 		<div
-			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-colors duration-300 {background} origin-bottom-right"
+			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-transform duration-1000 ease-linear {background} origin-bottom-right"
 			style="transform: skewY({skews.a}deg)"
 		/>
 		<div
-			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-colors duration-300 {background} origin-bottom-right"
+			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-transform duration-1000 ease-linear {background} origin-bottom-right"
 			style="transform: rotate(-90deg) skewY({skews.b}deg)"
 		/>
 		<div
-			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-colors duration-300 {background} origin-bottom-right"
+			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-transform duration-1000 ease-linear {background} origin-bottom-right"
 			style="transform: rotate(-180deg) skewY({skews.c}deg)"
 		/>
 		<div
-			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-colors duration-300 {background} origin-bottom-right"
+			class="w-screen h-screen absolute bottom-1/2 right-1/2 transition-transform duration-1000 ease-linear {background} origin-bottom-right"
 			style="transform: rotate(-270deg) skewY({skews.d}deg)"
 		/>
 	</div>
